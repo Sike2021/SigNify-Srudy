@@ -1,14 +1,19 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Source, TranslatorResponse } from './types';
 
-// Updated to the latest high-performance model
+// Using the most advanced Flash model for high-speed educational reasoning
 const GEMINI_MODEL = 'gemini-3-flash-preview';
 
 let aiInstance: GoogleGenAI | null = null;
 
 function getAi() {
+    // Crucial: Rely on process.env.API_KEY injected by the deployment environment
+    const apiKey = process.env.API_KEY;
+    if (!apiKey) {
+        throw new Error("API Key is missing. Ensure GEMINI_API_KEY is set in your environment variables.");
+    }
     if (!aiInstance) {
-        aiInstance = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+        aiInstance = new GoogleGenAI({ apiKey });
     }
     return aiInstance;
 }
@@ -37,24 +42,23 @@ async function* streamResponse(
             yield { text, sources };
         }
     } catch (e) {
-        console.error("Gemini Error:", e);
-        const detailedError = e instanceof Error ? e.message : "Connection failed.";
-        yield { text: `Error: ${detailedError}. Please check your connection.`, sources: [] };
+        console.error("Gemini stream error:", e);
+        yield { text: "Error: Could not connect to the AI tutor. Please check your internet connection or API key status.", sources: [] };
     }
 }
 
 export async function* streamQaResponse(prompt: string, subject: string, language: string, className: string): AsyncGenerator<{ text: string, sources: Source[] }> {
     const systemInstruction = {
-        parts: [{ text: `You are an expert AI tutor for Signify Study, developed by Sikandar Ali Malik (Sike).
-Context: ${className}, Sindh Text Book Board Jamshoro.
-Subject: ${subject}.
-Language: ${language}.
+        parts: [{ text: `You are Signify AI, the premier digital tutor developed by Sikandar Ali Malik (Sike).
+Your knowledge base is strictly defined by the Sindh Text Book Board Jamshoro curriculum for ${className}.
+Current Subject: ${subject}.
+Output Language: ${language}.
 
-Your goal is to provide answers derived STRICTLY from the official Sindh Board curriculum.
-1. Use Google Search to find relevant textbook snippets.
-2. Structure answers clearly with bold headings and bullet points.
-3. Keep the tone friendly and encouraging.
-4. If asked about the app, say: "I am Signify AI, developed by Sike to help students of the Sindh Board."`}]
+Operational Directives:
+1. Ground every answer in official Sindh Board standards.
+2. Use Google Search to find specific chapter names or lesson contexts if the query relates to specific board syllabus.
+3. Structure responses with bold section headings, bullet points, and short, impactful paragraphs.
+4. If asked about your origin, state: "I am Signify AI, an academic assistant built by Sikandar Ali Malik (Sike) to empower Sindh Board students."`}]
     };
     
     yield* streamResponse(
@@ -69,16 +73,14 @@ Your goal is to provide answers derived STRICTLY from the official Sindh Board c
 
 export async function* streamLessonResponse(className: string, subject: string, lessonQuery: string, language: string): AsyncGenerator<{ text: string, sources: Source[] }> {
     const systemInstruction = {
-        parts: [{ text: `You are a Digital Textbook Assistant.
-Task: Retrieve and format lesson content for ${className} ${subject}, Lesson: "${lessonQuery}" from the Sindh Text Book Board.
-1. Use Google Search to find the specific chapter or lesson contents.
-2. Provide a summary of the lesson.
-3. Include key definitions.
-4. List solved exercise questions if available.
-Respond primarily in ${language}.`}]
+        parts: [{ text: `You are the Digital Librarian for Signify Study.
+Task: Retrieve and summarize specific lesson content for ${className} ${subject}, specifically the lesson named: "${lessonQuery}".
+1. Search specifically for the contents of the Sindh Text Book Board version of this lesson.
+2. Provide a 'Lesson Overview', 'Key Definitions', and 'Standard Exercise Solutions'.
+3. Respond in ${language}. Use clear, academic tone.`}]
     };
     
-    const prompt = `Fetch the content for Class ${className}, Subject ${subject}, Lesson: ${lessonQuery} (Sindh Board).`;
+    const prompt = `Provide the detailed lesson content and exercise guide for Class ${className}, Subject ${subject}, Lesson: ${lessonQuery} (Sindh Board).`;
 
     yield* streamResponse(
         GEMINI_MODEL,
@@ -92,11 +94,11 @@ Respond primarily in ${language}.`}]
 
 export async function* streamGrammarResponse(prompt: string, _type: string, language: string, _class: string): AsyncGenerator<{ text: string, sources: Source[] }> {
     const systemInstruction = {
-        parts: [{ text: `You are a Grammar Expert AI Tutor.
-Task: Explain grammar rules (tenses, parts of speech, syntax) in ${language}.
-1. Use Markdown tables to show conjugations or comparisons.
-2. Provide at least 5 examples for every rule.
-3. Break complex concepts into "Easy to Remember" notes.`}]
+        parts: [{ text: `You are a Master Grammarian specializing in English, Urdu, and Sindhi.
+1. Explain rules (Tenses, Passive Voice, Parts of Speech, Sentence Structure) with extreme clarity.
+2. Always provide well-formatted Markdown tables for conjugations or comparison rules.
+3. Include exactly 5 varied, practical examples for every rule you explain.
+4. Keep the language level suitable for Class ${_class} students.`}]
     };
     
     yield* streamResponse(
@@ -109,15 +111,19 @@ Task: Explain grammar rules (tenses, parts of speech, syntax) in ${language}.
 export const getTranslatorResponse = async (text: string, language: string): Promise<TranslatorResponse> => {
     const ai = getAi();
     const systemInstruction = {
-        parts: [{ text: `You are a Master Translator.
-Task: Translate the given text into ${language} and provide a linguistic breakdown.
-You MUST respond with ONLY a JSON object.`}]
+        parts: [{ text: `You are a high-fidelity linguistic engine for educational translation in the Sindh region.
+Task: Translate the user's input into ${language}.
+Format: You MUST return a JSON object with:
+- 'mainTranslation': The fluent, context-aware translation.
+- 'wordByWord': An array of objects mapping 'original' to 'translation'.
+- 'explanation': A short note on any cultural or grammatical nuances.
+Return ONLY valid JSON.`}]
     };
 
     const schema = {
         type: Type.OBJECT,
         properties: {
-            mainTranslation: { type: Type.STRING, description: `The full translation into ${language}.` },
+            mainTranslation: { type: Type.STRING },
             wordByWord: {
                 type: Type.ARRAY,
                 items: {
@@ -129,7 +135,7 @@ You MUST respond with ONLY a JSON object.`}]
                     required: ["original", "translation"]
                 }
             },
-            explanation: { type: Type.STRING, description: "A brief cultural or grammatical note." }
+            explanation: { type: Type.STRING }
         },
         required: ["mainTranslation", "wordByWord"]
     };
@@ -137,17 +143,16 @@ You MUST respond with ONLY a JSON object.`}]
     try {
         const response = await ai.models.generateContent({
             model: GEMINI_MODEL,
-            contents: `Translate to ${language}: "${text}"`,
+            contents: `Translate the following text into ${language}: "${text}"`,
             config: {
                 systemInstruction,
                 responseMimeType: "application/json",
                 responseSchema: schema,
             },
         });
-        
         return JSON.parse(response.text.trim()) as TranslatorResponse;
     } catch (e) {
-        console.error("Translation Error:", e);
-        throw new Error("Failed to process translation.");
+        console.error("Linguistic processing error:", e);
+        throw new Error("Translator failed to parse text.");
     }
 };

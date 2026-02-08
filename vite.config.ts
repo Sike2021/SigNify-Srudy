@@ -4,19 +4,27 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig(({ mode }) => {
     const env = loadEnv(mode, '.', '');
+    
+    // Ensure we are picking up GEMINI_API_KEY from the system env if loadEnv doesn't find it
+    const apiKey = env.GEMINI_API_KEY || env.VITE_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '';
+
     return {
       plugins: [react()],
       define: {
-        'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
-        'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY)
+        'process.env.API_KEY': JSON.stringify(apiKey),
       },
       resolve: {
         alias: {
-          // FIX: `__dirname` is not available in all module contexts. Using `.`
-          // resolves to the current working directory, which is the project root
-          // when running Vite.
           '@': path.resolve('.'),
         }
+      },
+      server: {
+        port: 3000,
+        open: true
+      },
+      build: {
+        outDir: 'dist',
+        sourcemap: true
       }
     };
 });

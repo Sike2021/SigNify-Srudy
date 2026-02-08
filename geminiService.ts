@@ -1,16 +1,16 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Source, TranslatorResponse } from './types';
 
-// Using the most advanced Flash model for high-speed educational reasoning
-const GEMINI_MODEL = 'gemini-3-flash-preview';
+// Using gemini-2.5-flash as explicitly requested for broad compatibility
+const GEMINI_MODEL = 'gemini-2.5-flash';
 
 let aiInstance: GoogleGenAI | null = null;
 
 function getAi() {
-    // Crucial: Rely on process.env.API_KEY injected by the deployment environment
+    // The API key must be obtained exclusively from the environment variable process.env.API_KEY.
     const apiKey = process.env.API_KEY;
     if (!apiKey) {
-        throw new Error("API Key is missing. Ensure GEMINI_API_KEY is set in your environment variables.");
+        throw new Error("API Key is missing. Ensure it is set in your environment variables.");
     }
     if (!aiInstance) {
         aiInstance = new GoogleGenAI({ apiKey });
@@ -75,7 +75,7 @@ export async function* streamLessonResponse(className: string, subject: string, 
     const systemInstruction = {
         parts: [{ text: `You are the Digital Librarian for Signify Study.
 Task: Retrieve and summarize specific lesson content for ${className} ${subject}, specifically the lesson named: "${lessonQuery}".
-1. Search specifically for the contents of the Sindh Text Book Board version of this lesson.
+1. Search specifically for the contents of the Sindh Text Book Board version of this lesson using Google Search.
 2. Provide a 'Lesson Overview', 'Key Definitions', and 'Standard Exercise Solutions'.
 3. Respond in ${language}. Use clear, academic tone.`}]
     };

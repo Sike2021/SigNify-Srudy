@@ -1,0 +1,21 @@
+{
+  "short_name": "Signify",
+  "name": "Signify Study AI",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3413/3413535.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/3413/3413535.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0891b2",
+  "display": "standalone",
+  "theme_color": "#0891b2",
+  "orientation": "portrait"
+}

@@ -1,4 +1,4 @@
-// FIX: Define types for the application to ensure type safety.
+
 export interface Message {
   id: string;
   text: string;
@@ -12,10 +12,12 @@ export interface Source {
 }
 
 export interface TranslatorResponse {
-    mainTranslation: string;
-    wordByWord: {
-        original: string;
-        translation: string;
-    }[];
-    explanation?: string;
+  mainTranslation: string;
+  explanation: string;
+  wordByWord: {
+    original: string;
+    translation: string;
+  }[];
 }
+
+export type AppView = 'dashboard' | 'qa' | 'books' | 'translator' | 'grammar';

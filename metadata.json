@@ -1,5 +1,7 @@
 {
   "name": "SigNify Study AI",
   "description": "Essential AI tutor for Sindh Board Class X students. Minimal, fast, and multilingual.",
-  "requestFramePermissions": []
+  "requestFramePermissions": [
+    "geolocation"
+  ]
 }

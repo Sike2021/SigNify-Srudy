@@ -1,8 +1,8 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Source, TranslatorResponse } from './types';
 
-const MODEL = 'gemini-3-flash-preview';
+// strictly using gemini-2.5-flash
+const MODEL = 'gemini-2.5-flash';
 
 function getAi() {
   const apiKey = process.env.API_KEY;
@@ -43,20 +43,24 @@ async function* streamResponse(
 }
 
 export async function* streamQa(prompt: string, subject: string, lang: string) {
-  const sys = `You are SigNify AI, a tutor for Class 10 Sindh Board students. Subject: ${subject}. Language: ${lang}. 
-  Focus on the Sindh Textbook Board curriculum. Be clear, use markdown, and be helpful. Use emojis sparingly.`;
+  const sys = `You are SigNify AI, an expert tutor for Class 10 Sindh Board students. 
+  Subject: ${subject}. Language: ${lang}. 
+  Focus ONLY on the Sindh Textbook Board curriculum (Jamshoro). 
+  Provide accurate, textbook-aligned educational explanations using markdown.`;
   yield* streamResponse(prompt, sys, true);
 }
 
 export async function* streamBooks(query: string, subject: string, lang: string) {
-  const sys = `You are the Sindh Board Textbook Assistant. Provide summaries and solved exercise answers for Class 10 ${subject}. 
-  Query: ${query}. Language: ${lang}. If referencing specific chapters, be precise.`;
+  const sys = `You are the Sindh Board Textbook Assistant. 
+  Help students find summaries and solved exercise answers for Class 10 ${subject}. 
+  Language: ${lang}. Stick strictly to the official Jamshoro textbook content.`;
   yield* streamResponse(query, sys, true);
 }
 
 export async function* streamGrammar(prompt: string, lang: string) {
-  const sys = `You are a Grammar Expert for Sindh Board Class 10. Explain grammar rules for ${lang}, English, or Urdu. 
-  Always use markdown tables for conjugations/rules and provide 5 clear examples.`;
+  const sys = `You are a Grammar Expert for Sindh Board Class 10. 
+  Explain rules for English, Urdu, or Sindhi grammar as requested. 
+  Always use markdown tables for conjugations/rules. Provide clear examples.`;
   yield* streamResponse(prompt, sys);
 }
 
@@ -84,9 +88,9 @@ export async function getTranslation(text: string, targetLang: string): Promise<
 
   const response = await ai.models.generateContent({
     model: MODEL,
-    contents: `Translate "${text}" into ${targetLang}. Focus on educational context for a Class 10 student.`,
+    contents: `Translate into ${targetLang}: "${text}"`,
     config: {
-      systemInstruction: "You are a professional educational translator for English, Urdu, and Sindhi. Output JSON only.",
+      systemInstruction: "You are a professional educational translator for English, Urdu, and Sindhi. Return JSON only.",
       responseMimeType: "application/json",
       responseSchema: schema,
     },

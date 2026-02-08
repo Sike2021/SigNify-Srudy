@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
   <head>
@@ -8,7 +7,7 @@
     <meta name="theme-color" content="#0f172a" />
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="manifest" href="/manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -50,12 +49,27 @@
       .prose th { background: #334155; font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
       
       .btn-active:active { transform: scale(0.96); opacity: 0.9; }
-      .dashboard-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+      .dashboard-card { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; }
       .dashboard-card:active { transform: scale(0.95); }
     </style>
   </head>
   <body class="bg-slate-950 text-slate-100 antialiased">
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <script type="module" src="index.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          // Fix for origin mismatch in sandboxed environments
+          const origin = window.location.origin;
+          const swPath = new URL('sw.js', window.location.href).pathname;
+          navigator.serviceWorker.register(swPath, { scope: './' })
+            .then(() => console.log('SigNify SW Registered'))
+            .catch(() => {
+              // Silently bypass in restricted preview environments
+              console.warn('PWA features limited in this environment');
+            });
+        });
+      }
+    </script>
   </body>
 </html>

@@ -1,6 +1,8 @@
+
 {
-  "short_name": "Signify",
-  "name": "Signify Study AI",
+  "short_name": "SigNify",
+  "name": "SigNify Study AI",
+  "description": "Essential Class 10 Sindh Board Tutor",
   "icons": [
     {
       "src": "https://cdn-icons-png.flaticon.com/512/3413/3413535.png",
@@ -14,7 +16,7 @@
     }
   ],
   "start_url": "/",
-  "background_color": "#0891b2",
+  "background_color": "#0f172a",
   "display": "standalone",
   "theme_color": "#0891b2",
   "orientation": "portrait"

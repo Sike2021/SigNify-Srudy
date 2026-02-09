@@ -1,4 +1,4 @@
-const CACHE_NAME = 'signify-v5';
+const CACHE_NAME = 'signify-v6';
 const ASSETS = [
   './',
   './index.html',
